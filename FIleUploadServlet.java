@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -34,7 +31,7 @@ public class FileUploadServlet extends HttpServlet {
 		}
 
 		Part filePart = request.getPart("fileAttachment");
-		String fileName = filePart.getSubmittedFileName();
+		String fileName = getFileName(filePart);
 
 		if (fileName != null && !fileName.isEmpty()) {
 			File outputFile = new File(dir, fileName);
@@ -49,5 +46,15 @@ public class FileUploadServlet extends HttpServlet {
 		}
 
 		response.sendRedirect("fileuploadresponse.jsp");
+	}
+
+	private String getFileName(Part part) {
+		String contentDisp = part.getHeader("content-disposition");
+		for (String cd : contentDisp.split(";")) {
+			if (cd.trim().startsWith("filename")) {
+				return cd.substring(cd.indexOf('"') + 1, cd.lastIndexOf('"'));
+			}
+		}
+		return null;
 	}
 }
