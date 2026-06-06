@@ -6,15 +6,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/downloadServlet")
 public class FileDownloadServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
 
+	private static final long serialVersionUID = 1L;
 	public static int BUFFER_SIZE = 1024 * 100;
 
 	public FileDownloadServlet() {
@@ -44,7 +42,9 @@ public class FileDownloadServlet extends HttpServlet {
 		response.setContentLength((int) file.length());
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
 
-		try (FileInputStream fis = new FileInputStream(file)) {
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(file);
 			OutputStream os = response.getOutputStream();
 			byte[] buffer = new byte[BUFFER_SIZE];
 			int bytesRead;
@@ -52,6 +52,8 @@ public class FileDownloadServlet extends HttpServlet {
 				os.write(buffer, 0, bytesRead);
 			}
 			os.flush();
+		} finally {
+			if (fis != null) try { fis.close(); } catch (IOException e) {}
 		}
 	}
 

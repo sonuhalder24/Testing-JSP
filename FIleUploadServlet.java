@@ -7,13 +7,11 @@ import java.io.InputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
-@WebServlet("/fileUploadServlet")
 @MultipartConfig
 public class FileUploadServlet extends HttpServlet {
 
@@ -35,13 +33,19 @@ public class FileUploadServlet extends HttpServlet {
 
 		if (fileName != null && !fileName.isEmpty()) {
 			File outputFile = new File(dir, fileName);
-			try (InputStream is = filePart.getInputStream();
-				 FileOutputStream fos = new FileOutputStream(outputFile)) {
+			InputStream is = null;
+			FileOutputStream fos = null;
+			try {
+				is = filePart.getInputStream();
+				fos = new FileOutputStream(outputFile);
 				byte[] buffer = new byte[1024];
 				int bytesRead;
 				while ((bytesRead = is.read(buffer)) != -1) {
 					fos.write(buffer, 0, bytesRead);
 				}
+			} finally {
+				if (is != null) try { is.close(); } catch (IOException e) {}
+				if (fos != null) try { fos.close(); } catch (IOException e) {}
 			}
 		}
 
